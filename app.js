@@ -15,6 +15,14 @@ function parseUserid(userid) {
   return { username, authority };
 }
 
+function isPrivate(ann) {
+  return !ann.permissions.read.some(p => p.indexOf('group:'));
+}
+
+function isInGroup(ann) {
+  return !ann.permissions.read.some(p => p.indexOf('group:__world__'));
+}
+
 /**
  * A simple JavaScript application which lets the user view some data about
  * their Hypothesis profile.
@@ -40,6 +48,8 @@ class App extends Component {
       profile: null,
       // Last `Error` that occurred
       error: null,
+      // Statistics about the user's annotations
+      annotationStats: null,
     };
   }
 
@@ -57,11 +67,11 @@ class App extends Component {
     }
 
     if (this.state.authorizing) {
-      messages.push('Waiting for authorization');
+      messages.push('Waiting for authorization…');
     }
 
     if (this.state.fetching) {
-      messages.push('Fetching profile...');
+      messages.push('Fetching profile…');
     }
 
     if (this.state.profile) {
@@ -118,6 +128,19 @@ class App extends Component {
          )
       ),
 
+      // Annotation stats
+      h('div', {},
+        h('h2', {}, 'Annotation Stats'),
+        this.state.annotationStats ? [
+          h('div', {}, `Total: ${this.state.annotationStats.total}`),
+          h('div', {}, `Private: ${this.state.annotationStats.privateTotal}`),
+          h('div', {}, `In groups: ${this.state.annotationStats.groupTotal}`),
+        ] :
+          'Fetching…'
+      ),
+
+      h('hr'),
+
       // Logout
       h('button', {
         onClick: () => this._logout()
@@ -127,6 +150,7 @@ class App extends Component {
 
   _logout() {
     this.setState({
+      annotationStats: null,
       isLoggedIn: false,
       profile: null,
     });
@@ -159,6 +183,18 @@ class App extends Component {
       this.setState({
         fetching: false,
         profile,
+      });
+
+      this.client.fetchAll().then((anns) => {
+        const total = anns.length;
+        const privateTotal = anns.filter(isPrivate).length;
+        const groupTotal = anns.filter(isInGroup).length;
+
+        this.setState({
+          annotationStats: { total, privateTotal, groupTotal },
+        });
+      }).catch((err) => {
+        this.setState({ error: err });
       });
     }).catch((err) => {
       this.setState({

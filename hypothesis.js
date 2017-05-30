@@ -104,7 +104,7 @@ class HypothesisAPIClient {
    * @param {Object} [data] - Body of the request
    * @return {Object} - The JSON response from the API.
    */
-  request(method, data) {
+  request(method, data = null, params = {}) {
     const path = method.split('.');
     let meta = this.links;
 
@@ -120,10 +120,37 @@ class HypothesisAPIClient {
       headers.Authorization = `Bearer ${this.token}`;
     }
 
-    return fetch(meta.url, {
+    const url = new URL(meta.url);
+    Object.keys(params).forEach(k => {
+      url.searchParams.append(k, params[k]);
+    });
+
+    return fetch(url.toString(), {
       method: meta.method,
       headers,
       body: data,
     }).then(r => r.json());
+  }
+
+  /**
+   * Fetch all of the user's annotations.
+   *
+   * @return {Annotation[]}
+   */
+  async fetchAll() {
+    const anns = [];
+    let total = null;
+
+    while (total === null || anns.length < total) {
+      const searchResult = await this.request('search', null, {
+        offset: anns.length,
+        limit: 1000,
+      });
+
+      total = searchResult.total;
+      anns.push(...searchResult.rows);
+    }
+
+    return anns;
   }
 }
