@@ -25,7 +25,12 @@ class App extends Component {
 
     this.client = new HypothesisAPIClient(DEFAULT_SERVICE_URL);
 
+    const clientId = localStorage.getItem('hypothesis-client-id');
+
     this.state = {
+      // The OAuth client ID.
+      clientId,
+      // `true` if the user is currently logged in.
       isLoggedIn: false,
       // `true` if we're waiting for user to authorize app.
       authorizing: false,
@@ -70,11 +75,18 @@ class App extends Component {
     );
   }
 
+  _clientIdChanged(id) {
+    localStorage.setItem('hypothesis-client-id', id);
+    this.setState({ clientId: id });
+  }
+
   _renderLoginForm() {
     return h('form', { onSubmit: (e) => this._login(e) },
         h('input', {
           name: 'client_id',
           placeholder: 'OAuth Client ID',
+          onInput: (e) => this._clientIdChanged(e.target.value),
+          value: this.state.clientId,
         }),
         h('button', {}, 'Login to Hypothesis')
       );
