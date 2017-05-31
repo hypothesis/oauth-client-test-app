@@ -43,6 +43,9 @@ class HypothesisAPIClient {
         if (event.data.type === 'authorization_response') {
           resolve(event.data);
         }
+        if (event.data.type === 'authorization_canceled') {
+          reject(new Error('Authorization window was closed'));
+        }
         window.removeEventListener('message', authRespListener);
       }
       window.addEventListener('message', authRespListener);
