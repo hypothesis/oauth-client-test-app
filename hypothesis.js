@@ -16,6 +16,9 @@
  * ```
  */
 class HypothesisAPIClient {
+  /**
+   * @param {string} serviceUrl
+   */
   constructor(serviceUrl) {
     /** URL of the service, eg. https://hypothes.is */
     this.serviceUrl = serviceUrl;
@@ -32,9 +35,12 @@ class HypothesisAPIClient {
   /**
    * Authenticate with the Hypothesis service.
    *
+   * @param {string} clientId - OAuth client ID
    * @return {Promise<string>} - Access token for making API requests.
    */
   async login(clientId) {
+    // Promise which resolves or rejects when the user accepts or closes the
+    // auth popup.
     const authResponse = new Promise((resolve, reject) => {
       function authRespListener(event) {
         if (typeof event.data !== 'object') {
@@ -105,7 +111,8 @@ class HypothesisAPIClient {
    *
    * @param {string} method - The method path, eg. "annotation.read".
    * @param {Object} [data] - Body of the request
-   * @return {Object} - The JSON response from the API.
+   * @param {Object} [params] - Dictionary of query string parameters for the request.
+   * @return {Promise<Object>} - The JSON response from the API.
    */
   request(method, data = null, params = {}) {
     const path = method.split('.');
@@ -138,7 +145,7 @@ class HypothesisAPIClient {
   /**
    * Fetch all of the user's annotations.
    *
-   * @return {Annotation[]}
+   * @return {Promise<Annotation[]>}
    */
   async fetchAll() {
     const anns = [];
