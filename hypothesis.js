@@ -1,5 +1,11 @@
 'use strict';
 
+function randomHexString(len) {
+  const bytes = new Uint8Array(len / 2);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes).map(byte => byte.toString(16)).join('');
+}
+
 /**
  * Simple client for authenticating with the Hypothesis API and making requests
  * to it.
@@ -39,6 +45,10 @@ class HypothesisAPIClient {
    * @return {Promise<string>} - Access token for making API requests.
    */
   async login(clientId) {
+    // Random state string used to check that auth messages came from the popup
+    // window that we opened.
+    const state = randomHexString(16);
+
     // Promise which resolves or rejects when the user accepts or closes the
     // auth popup.
     const authResponse = new Promise((resolve, reject) => {
@@ -46,6 +56,12 @@ class HypothesisAPIClient {
         if (typeof event.data !== 'object') {
           return;
         }
+
+        if (event.data.state !== state) {
+          // This message came from a different popup window.
+          return;
+        }
+
         if (event.data.type === 'authorization_response') {
           resolve(event.data);
         }
@@ -64,10 +80,10 @@ class HypothesisAPIClient {
     const top    = window.screenY + ((window.innerHeight / 2) - (height / 2));
 
     const origin = location.origin;
-    const authUrl = `${this.serviceUrl}/oauth/authorize?client_id=${clientId}&response_type=code&response_mode=web_message&origin=${origin}`;
+    const authUrl = `${this.serviceUrl}/oauth/authorize?client_id=${clientId}&response_type=code&response_mode=web_message&origin=${origin}&state=${state}`;
     window.open(authUrl, 'Login to Hypothesis', `left=${left},top=${top},width=${width},height=${height}`);
 
-    const { code, state } = await authResponse;
+    const { code } = await authResponse;
 
     // Exchange grant token for access token.
     // Note that the token will expire after a period of time.
