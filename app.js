@@ -91,7 +91,9 @@ class App extends Component {
   }
 
   _renderLoginForm() {
-    return h('form', { onSubmit: (e) => this._login(e) },
+    return h('div', {},
+      h('h2', {}, 'Third party client test app'),
+      h('form', { onSubmit: (e) => this._login(e) },
         h('input', {
           name: 'client_id',
           placeholder: 'OAuth Client ID',
@@ -99,7 +101,8 @@ class App extends Component {
           value: this.state.clientId,
         }),
         h('button', {}, 'Login to Hypothesis')
-      );
+      )
+    );
   }
 
   _renderProfileInfo() {
