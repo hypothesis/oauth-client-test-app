@@ -1,6 +1,6 @@
 # Hypothesis OAuth Client Test
 
-**DOCUMENTATION: OAuth Documentation for Hypothesis can be found here: https://h.readthedocs.io/en/latest/api/using-oauth/ 
+**DOCUMENTATION: OAuth Documentation for Hypothesis can be found here: https://h.readthedocs.io/en/latest/api/using-oauth/**
 
 This is a simple browser-based client for the Hypothesis API.
 
