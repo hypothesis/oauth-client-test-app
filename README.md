@@ -1,7 +1,6 @@
 # Hypothesis OAuth Client Test
 
-**WORK IN PROGRESS: OAuth authentication support for Hypothesis is currently
-being worked on. You cannot yet use this with the public Hypothesis service.**
+**DOCUMENTATION: OAuth Documentation for Hypothesis can be found here: https://h.readthedocs.io/en/latest/api/using-oauth/**
 
 This is a simple browser-based client for the Hypothesis API.
 
